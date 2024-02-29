@@ -1,5 +1,5 @@
 # This file was created by Justin Nguyen
-
+# period 4
 # importing libraries
 import pygame as pg
 from settings import *
@@ -29,22 +29,9 @@ class Game:
 
     def load_data(self):
         game_folder = path.dirname(__file__)
+        img_folder = path.join(game_folder, 'images')
+        self.player_img = pg.image.load(path.join(img_folder, 'baby_yoda.png')).convert_alpha()
         self.map_data = []
-        # 'r'     open for reading (default)
-        # 'w'     open for writing, truncating the file first
-        # 'x'     open for exclusive creation, failing if the file already exists
-        # 'a'     open for writing, appending to the end of the file if it exists
-        # 'b'     binary mode
-        # 't'     text mode (default)
-        # '+'     open a disk file for updating (reading and writing)
-        # 'U'     universal newlines mode (deprecated)
-        # below opens file for reading in text mode
-        # with 
-        '''
-        The with statement is a context manager in Python. 
-        It is used to ensure that a resource is properly closed or released 
-        after it is used. This can help to prevent errors and leaks.
-        '''
         with open(path.join(game_folder, 'map.txt'), 'rt') as f:
             for line in f:
                 print(line)
@@ -55,11 +42,7 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
-        # makes player at x = 10 y = 10
-        # self.player = Player(self, 10, 10)
-        # adds the player to sprites
-        # self.all_sprites.add(self.player)
-        # newsted for loop to print walls
+        self.power_ups = pg.sprite.Group()
         for row, tiles in enumerate(self.map_data):
             print(row)
             for col, tile in enumerate(tiles):
@@ -71,6 +54,8 @@ class Game:
                     self.player = Player(self, col, row)
                 if tile == 'c':
                     Coin(self, col, row)
+                if tile == "u":
+                    PowerUp(self, col, row)
 
 
     # run method
@@ -119,16 +104,6 @@ class Game:
             if event.type == pg.QUIT:
                 self.quit()
                 print("the game has ended")
-            # nested if statements for controlling movement
-            # if event.type == pg.KEYDOWN:
-            #     if event.key == pg.K_LEFT:
-            #         self.player.move(dx = -1)
-            #     if event.key == pg.K_UP:
-            #         self.player.move(dy = -1)
-            #     if event.key == pg.K_RIGHT:
-            #         self.player.move(dx = 1)
-            #     if event.key == pg.K_DOWN:
-            #         self.player.move(dy = 1)
 
     def show_start_screen(self):
         pass
