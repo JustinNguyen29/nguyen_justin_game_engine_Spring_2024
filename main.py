@@ -8,6 +8,12 @@ import sys
 from random import randint
 from os import path
 
+# New things to include
+# Teleport
+# Enemies following player
+# Scrolling backgrounds
+# Scoreboard
+
 # create a game class 
 class Game:
     # initializing class
@@ -43,6 +49,7 @@ class Game:
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
+        self.mobs = pg.sprite.Group()
         for row, tiles in enumerate(self.map_data):
             print(row)
             for col, tile in enumerate(tiles):
@@ -56,6 +63,8 @@ class Game:
                     Coin(self, col, row)
                 if tile == "u":
                     PowerUp(self, col, row)
+                if tile == 'm':
+                    Mob(self, col, row)
 
 
     # run method
