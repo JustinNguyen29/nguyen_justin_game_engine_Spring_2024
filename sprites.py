@@ -2,6 +2,7 @@
 # Appreciation to Chris Bradfield
 import pygame as pg
 from settings import *
+import math
 
 # write a player class
 class Player(pg.sprite.Sprite):
@@ -123,7 +124,6 @@ class PowerUp(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
-
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
@@ -132,12 +132,10 @@ class Mob(pg.sprite.Sprite):
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image.fill(RED)
         self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
-        self.vx, self.vy = 100, 100
         self.x = x * TILESIZE
         self.y = y * TILESIZE
-        self.speed = 1
+        self.speed = 100  # Set a consistent speed for the Mob
+
     def collide_with_walls(self, dir):
         if dir == 'x':
             # print('colliding on the x')
@@ -151,19 +149,28 @@ class Mob(pg.sprite.Sprite):
             if hits:
                 self.vy *= -1
                 self.rect.y = self.y
+
     def update(self):
-        # self.rect.x += 1
+        # Calculate the difference in x and y between mob and player
+        dx = self.game.player.rect.x - self.rect.x
+        dy = self.game.player.rect.y - self.rect.y
+
+        # Calculate the distance to the player using Distance Formula
+        distance = math.sqrt(dx**2 + dy**2)
+
+        # Normalize the vector and multiply by mob speed to get velocity
+        if distance != 0:
+            self.vx = (dx / distance) * self.speed
+            self.vy = (dy / distance) * self.speed
+        else:
+            self.vx = 0
+            self.vy = 0
+
+        # Apply the velocity to the mob's position
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
-        
-        if self.rect.x < self.game.player.rect.x:
-            self.vx = 100
-        if self.rect.x > self.game.player.rect.x:
-            self.vx = -100    
-        if self.rect.y < self.game.player.rect.y:
-            self.vy = 100
-        if self.rect.y > self.game.player.rect.y:
-            self.vy = -100
+
+        # Update rect for collision detection
         self.rect.x = self.x
         self.collide_with_walls('x')
         self.rect.y = self.y
