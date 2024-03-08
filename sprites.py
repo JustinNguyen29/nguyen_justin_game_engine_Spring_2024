@@ -138,16 +138,22 @@ class Mob(pg.sprite.Sprite):
 
     def collide_with_walls(self, dir):
         if dir == 'x':
-            # print('colliding on the x')
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
-                self.vx *= -1
+                if self.vx > 0:  # Moving right; hit the left side of the wall
+                    self.x = hits[0].rect.left - self.rect.width
+                elif self.vx < 0:  # Moving left; hit the right side of the wall
+                    self.x = hits[0].rect.right
+                self.vx = 0
                 self.rect.x = self.x
         if dir == 'y':
-            # print('colliding on the y')
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
-                self.vy *= -1
+                if self.vy > 0:  # Moving down; hit the top side of the wall
+                    self.y = hits[0].rect.top - self.rect.height
+                elif self.vy < 0:  # Moving up; hit the bottom side of the wall
+                    self.y = hits[0].rect.bottom
+                self.vy = 0
                 self.rect.y = self.y
 
     def update(self):
@@ -166,12 +172,12 @@ class Mob(pg.sprite.Sprite):
             self.vx = 0
             self.vy = 0
 
-        # Apply the velocity to the mob's position
-        self.x += self.vx * self.game.dt
-        self.y += self.vy * self.game.dt
-
         # Update rect for collision detection
+        self.x += self.vx * self.game.dt
         self.rect.x = self.x
         self.collide_with_walls('x')
+
+        # Move vertically and handle vertical collisions
+        self.y += self.vy * self.game.dt
         self.rect.y = self.y
         self.collide_with_walls('y')
