@@ -4,6 +4,7 @@
 import pygame as pg
 from settings import *
 from sprites import *
+from utils import *
 import sys
 from random import randint
 from os import path
@@ -67,7 +68,7 @@ class Game:
 
     def new(self):
         # create timer
-        self.test_timer = Cooldown()
+        self.cooldown = Timer(self)
         # makes sprites into a group
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
@@ -113,6 +114,8 @@ class Game:
 
     # update function to update all sprites
     def update(self):
+        # tick the test timer
+        self.cooldown.ticking()
         self.all_sprites.update()
 
     # draw_grid function to draw the grid with height HEIGHT
@@ -137,7 +140,7 @@ class Game:
             self.draw_grid()
             self.all_sprites.draw(self.screen)
             # draw the timer
-            self.draw_text(self.screen, str(self.test_timer.countdown(45)), 24, BGCOLOR, WIDTH/2 - 32, 2)
+            self.draw_text(self.screen, str(self.cooldown.current_time), 24, BGCOLOR, WIDTH/2 - 32, 2)
             pg.display.flip()
 
     def events(self):
