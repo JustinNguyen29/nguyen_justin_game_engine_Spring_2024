@@ -26,8 +26,6 @@ class Player(pg.sprite.Sprite):
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.vx = -self.speed
-            print(self.rect.x)
-            print(self.rect.y)
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
             self.vx = self.speed
         if keys[pg.K_UP] or keys[pg.K_w]:
@@ -62,6 +60,12 @@ class Player(pg.sprite.Sprite):
                 self.moneybag += 1
             if str(hits[0].__class__.__name__) == "PowerUp":
                 self.speed += 200
+            if str(hits[0].__class__.__name__) == "Portal":
+                self.x = hits[0].destination_x
+                self.y = hits[0].destination_y
+                self.rect.x = self.x
+                self.rect.y = self.y
+    
 
 
     # new motion
@@ -70,11 +74,12 @@ class Player(pg.sprite.Sprite):
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
         self.rect.x = self.x
-        self.collide_with_walls('x')
         self.rect.y = self.y
+        self.collide_with_walls('x')
         self.collide_with_walls('y')
         self.collide_with_group(self.game.coins, True)
         self.collide_with_group(self.game.power_ups, True)
+        self.collide_with_group(self.game.portals, True)
 
 
 # Wall class
@@ -103,7 +108,7 @@ class Coin(pg.sprite.Sprite):
         self.game = game
         # decreased width and height of the coin so it fits within the cell
         self.image = pg.Surface((TILESIZE - 2, TILESIZE - 2))
-        self.image.fill(RED)
+        self.image.fill(PURPLE)
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -181,3 +186,20 @@ class Mob(pg.sprite.Sprite):
         self.y += self.vy * self.game.dt
         self.rect.y = self.y
         self.collide_with_walls('y')
+
+class Portal(pg.sprite.Sprite):
+    def __init__(self, game, x, y, destination_x, destination_y):
+        self.groups = game.all_sprites, game.portals
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(BLUE)  # Assuming BLUE for the portal color
+        self.rect = self.image.get_rect()
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
+        self.rect.x = self.x
+        self.rect.y = self.y
+        # Destination coordinates for the corresponding Portal2
+        self.destination_x = 5 * TILESIZE
+        self.destination_y = 6 * TILESIZE
+
