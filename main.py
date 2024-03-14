@@ -77,11 +77,8 @@ class Game:
         self.mobs = pg.sprite.Group()
         self.portals = pg.sprite.Group()
         for row, tiles in enumerate(self.map_data):
-            print(row)
             for col, tile in enumerate(tiles):
-                print(col)
                 if tile == '1':
-                    print("a wall at", row, col)
                     Wall(self, col, row)
                 if tile == 'p':
                     self.player = Player(self, col, row)

@@ -149,18 +149,18 @@ class Mob(pg.sprite.Sprite):
         if dir == 'x':
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
-                if self.vx > 0:  # Moving right; hit the left side of the wall
+                if self.vx > 0:  # Moving right- hit the left side of the wall
                     self.x = hits[0].rect.left - self.rect.width
-                elif self.vx < 0:  # Moving left; hit the right side of the wall
+                elif self.vx < 0:  # Moving left- hit the right side of the wall
                     self.x = hits[0].rect.right
                 self.vx = 0
                 self.rect.x = self.x
         if dir == 'y':
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
             if hits:
-                if self.vy > 0:  # Moving down; hit the top side of the wall
+                if self.vy > 0:  # Moving down- hit the top side of the wall
                     self.y = hits[0].rect.top - self.rect.height
-                elif self.vy < 0:  # Moving up; hit the bottom side of the wall
+                elif self.vy < 0:  # Moving up- hit the bottom side of the wall
                     self.y = hits[0].rect.bottom
                 self.vy = 0
                 self.rect.y = self.y
@@ -204,6 +204,6 @@ class Portal(pg.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
         # Destination coordinates for the corresponding Portal2
-        self.destination_x = 5 * TILESIZE
-        self.destination_y = 20 * TILESIZE
+        self.destination_x = TILESIZE
+        self.destination_y = TILESIZE
 
