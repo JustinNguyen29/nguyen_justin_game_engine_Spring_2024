@@ -3,6 +3,7 @@
 import pygame as pg
 from settings import *
 import math
+import random
 
 # write a player class
 class Player(pg.sprite.Sprite):
@@ -61,12 +62,15 @@ class Player(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "PowerUp":
                 self.speed += 200
             if str(hits[0].__class__.__name__) == "Portal":
-                self.x = hits[0].destination_x
-                self.y = hits[0].destination_y
+                max_x = WIDTH - TILESIZE * 10
+                max_y = WIDTH - TILESIZE * 10
+                random_x = random.randint(0, max_x // TILESIZE) * TILESIZE
+                random_y = random.randint(0, max_y // TILESIZE) * TILESIZE     
+                # Teleport the player to the random position
+                self.x = random_x
+                self.y = random_y
                 self.rect.x = self.x
                 self.rect.y = self.y
-    
-
 
     # new motion
     def update(self):
@@ -74,8 +78,8 @@ class Player(pg.sprite.Sprite):
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
         self.rect.x = self.x
-        self.rect.y = self.y
         self.collide_with_walls('x')
+        self.rect.y = self.y
         self.collide_with_walls('y')
         self.collide_with_group(self.game.coins, True)
         self.collide_with_group(self.game.power_ups, True)
@@ -193,7 +197,7 @@ class Portal(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(BLUE)  # Assuming BLUE for the portal color
+        self.image.fill(BLUE)
         self.rect = self.image.get_rect()
         self.x = x * TILESIZE
         self.y = y * TILESIZE
@@ -201,5 +205,5 @@ class Portal(pg.sprite.Sprite):
         self.rect.y = self.y
         # Destination coordinates for the corresponding Portal2
         self.destination_x = 5 * TILESIZE
-        self.destination_y = 6 * TILESIZE
+        self.destination_y = 20 * TILESIZE
 

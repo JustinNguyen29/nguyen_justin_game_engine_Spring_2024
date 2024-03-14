@@ -92,7 +92,7 @@ class Game:
                 if tile == 'm':
                     Mob(self, col, row)
                 if tile == 'P':
-                    Portal(self, col, row, 5, 7)
+                    Portal(self, col, row, 5, 20)
 
 
     # run method
