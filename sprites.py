@@ -59,8 +59,12 @@ class Player(pg.sprite.Sprite):
         if hits:
             if str(hits[0].__class__.__name__) == "Coin":
                 self.moneybag += 1
+                print("You collected a coin!")
+                print("Coin count: " + str(self.moneybag))
             if str(hits[0].__class__.__name__) == "PowerUp":
                 self.speed += 200
+            if str(hits[0].__class__.__name__) == "SlowDown":
+                self.speed -= 100          
             if str(hits[0].__class__.__name__) == "Portal":
                 max_x = WIDTH - TILESIZE * 10
                 max_y = WIDTH - TILESIZE * 10
@@ -84,6 +88,7 @@ class Player(pg.sprite.Sprite):
         self.collide_with_group(self.game.coins, True)
         self.collide_with_group(self.game.power_ups, True)
         self.collide_with_group(self.game.portals, True)
+        self.collide_with_group(self.game.slow_downs, True)
 
 
 # Wall class
@@ -132,6 +137,20 @@ class PowerUp(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+
+class SlowDown(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.slow_downs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(ORANGE)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
 
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):

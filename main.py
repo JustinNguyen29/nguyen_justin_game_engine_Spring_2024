@@ -76,6 +76,7 @@ class Game:
         self.power_ups = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         self.portals = pg.sprite.Group()
+        self.slow_downs = pg.sprite.Group()
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
                 if tile == '1':
@@ -90,6 +91,8 @@ class Game:
                     Mob(self, col, row)
                 if tile == 'P':
                     Portal(self, col, row, 5, 20)
+                if tile == 's':
+                    SlowDown(self, col, row)
 
 
     # run method
