@@ -21,6 +21,9 @@ class Player(pg.sprite.Sprite):
         self.y = y * TILESIZE
         self.speed = 300
         self.moneybag = 0
+        self.invisible = False
+        self.invisible_timer = 0
+
 
     def get_keys(self):
         self.vx, self.vy = 0, 0
@@ -75,6 +78,10 @@ class Player(pg.sprite.Sprite):
                 self.y = random_y
                 self.rect.x = self.x
                 self.rect.y = self.y
+            if str([hits].__class__.__name__) == "Invisible":
+                self.invisible = True
+                self.invisible_timer = pg.time.get_ticks()
+                self.image.fill(BGCOLOR)        
 
     # new motion
     def update(self):
@@ -88,7 +95,14 @@ class Player(pg.sprite.Sprite):
         self.collide_with_group(self.game.coins, True)
         self.collide_with_group(self.game.power_ups, True)
         self.collide_with_group(self.game.portals, True)
-        self.collide_with_group(self.game.slow_downs, True)
+        self.collide_with_group(self.game.slow_downs, True)        
+        self.collide_with_group(self.game.invisibles, True)
+        if self.invisible:
+            current_time = pg.time.get_ticks()
+            if current_time - self.invisible_timer > 5000:  # 5 seconds
+                self.invisible = False
+                self.image.fill(GREEN)
+
 
 
 # Wall class
@@ -225,4 +239,17 @@ class Portal(pg.sprite.Sprite):
         # Destination coordinates for the corresponding Portal2
         self.destination_x = TILESIZE
         self.destination_y = TILESIZE
+
+class Invisible(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.invisibles
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
+        self.rect.x = self.x
+        self.rect.y = self.y
 

@@ -77,6 +77,7 @@ class Game:
         self.mobs = pg.sprite.Group()
         self.portals = pg.sprite.Group()
         self.slow_downs = pg.sprite.Group()
+        self.invisibles = pg.sprite.Group()
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
                 if tile == '1':
@@ -93,6 +94,8 @@ class Game:
                     Portal(self, col, row, 5, 20)
                 if tile == 's':
                     SlowDown(self, col, row)
+                if tile == 'i':
+                    Invisible(self, col, row)
 
 
     # run method
@@ -155,17 +158,29 @@ class Game:
                 print("the game has ended")
 
     def show_start_screen(self):
-        pass
-    
-    def show_go_screen(self):
-        pass
-    
+        self.screen.fill(BGCOLOR)
+        self.draw_text(self.screen, "This is the start screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
+        pg.display.flip()
+        self.wait_for_key()
+
+    def wait_for_key(self):
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    waiting = False
+                    self.quit()
+                if event.type == pg.KEYUP:
+                    waiting = False
+        
+
 
 
 
 # Instantiate Game
 g = Game()
-# g.show_go_screen()
+g.show_start_screen()
 while True:
     g.new()
     g.run()
