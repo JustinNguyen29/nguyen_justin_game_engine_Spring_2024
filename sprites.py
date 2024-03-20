@@ -12,9 +12,7 @@ class Player(pg.sprite.Sprite):
         self.groups = game.all_sprites
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        # self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image = game.player_img
-        # self.image.fill(GREEN)
         self.rect = self.image.get_rect()
         self.vx, self.vy = 0, 0
         self.x = x * TILESIZE
@@ -22,7 +20,7 @@ class Player(pg.sprite.Sprite):
         self.speed = 300
         self.moneybag = 0
 
-
+    # get keys function which gets input from keyboard and corresponds to direction of player
     def get_keys(self):
         self.vx, self.vy = 0, 0
         keys = pg.key.get_pressed()
@@ -35,6 +33,7 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vy = self.speed
 
+    # collide with walls group with nested if stateents if player collides with top/bottom left/right of wall
     def collide_with_walls(self, dir):
         if dir == 'x':
             hits = pg.sprite.spritecollide(self, self.game.walls, False )
@@ -55,20 +54,23 @@ class Player(pg.sprite.Sprite):
                 self.vy = 0
                 self.rect.y = self.y
 
+    # collide with group function that checks if player collides with another class
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
         if hits:
             if str(hits[0].__class__.__name__) == "Coin":
                 self.moneybag += 1
                 print("You collected a coin!")
-                print("Coin count: " + str(self.moneybag))
+                print("Coin count: " + str(self.moneybag)) # printing coin statements
             if str(hits[0].__class__.__name__) == "PowerUp":
-                self.speed += 200
+                self.speed += 200 # increase player speed by 200
             if str(hits[0].__class__.__name__) == "SlowDown":
-                self.speed -= 100          
+                self.speed -= 100 # decrease player speed by 100  
             if str(hits[0].__class__.__name__) == "Portal":
+                # set max_x and max_y to maximimum dimension of the window
                 max_x = WIDTH - TILESIZE * 10
                 max_y = WIDTH - TILESIZE * 10
+                # generate random x, y coordinates
                 random_x = random.randint(0, max_x // TILESIZE) * TILESIZE
                 random_y = random.randint(0, max_y // TILESIZE) * TILESIZE     
                 # Teleport the player to the random position
@@ -76,8 +78,11 @@ class Player(pg.sprite.Sprite):
                 self.y = random_y
                 self.rect.x = self.x
                 self.rect.y = self.y
+            if str(hits[0].__class__.__name__) == "Mob":
+                self.playing = False          
 
     # new motion
+    # check if player collides with groups
     def update(self):
         self.get_keys()
         self.x += self.vx * self.game.dt
@@ -89,7 +94,7 @@ class Player(pg.sprite.Sprite):
         self.collide_with_group(self.game.coins, True)
         self.collide_with_group(self.game.power_ups, True)
         self.collide_with_group(self.game.portals, True)
-        self.collide_with_group(self.game.slow_downs, True)        
+        self.collide_with_group(self.game.slow_downs, True)      
 
 
 
@@ -128,6 +133,7 @@ class Coin(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE + 1.4
         self.rect.y = y * TILESIZE + 1.4
 
+# Initializes PowerUp class
 class PowerUp(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.power_ups
@@ -141,6 +147,7 @@ class PowerUp(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
+# initializes slowDown class
 class SlowDown(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.slow_downs
@@ -154,7 +161,7 @@ class SlowDown(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
-
+# initializes mob class
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
@@ -188,6 +195,8 @@ class Mob(pg.sprite.Sprite):
                 self.rect.y = self.y
 
     def update(self):
+        # utilized AI to help find the distance to player and normalizing the vector. I decided to use this method
+        # as it provided a more streamlined approach to the mob following the player
         # Calculate the difference in x and y between mob and player
         dx = self.game.player.rect.x - self.rect.x
         dy = self.game.player.rect.y - self.rect.y
@@ -213,6 +222,7 @@ class Mob(pg.sprite.Sprite):
         self.rect.y = self.y
         self.collide_with_walls('y')
 
+# Initializing portal Class
 class Portal(pg.sprite.Sprite):
     def __init__(self, game, x, y, destination_x, destination_y):
         self.groups = game.all_sprites, game.portals

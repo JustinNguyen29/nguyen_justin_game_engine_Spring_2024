@@ -69,7 +69,7 @@ class Game:
     def new(self):
         # create timer
         self.cooldown = Timer(self)
-        # makes sprites into a group
+        # make all sprites into a group
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
@@ -177,7 +177,7 @@ class Game:
 # Instantiate Game
 g = Game()
 g.show_start_screen()
-while True:
+while g.running:
     g.new()
     g.run()
     # g.show_go_screen()
