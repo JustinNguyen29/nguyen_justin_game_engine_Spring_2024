@@ -55,6 +55,7 @@ class Game:
         self.running = True
         # later on we'll story game info with this
         self.load_data()
+        self.game_over = False
 
     def load_data(self):
         game_folder = path.dirname(__file__)
@@ -77,6 +78,7 @@ class Game:
         self.mobs = pg.sprite.Group()
         self.portals = pg.sprite.Group()
         self.slow_downs = pg.sprite.Group()
+        # go through each line of the text file searching for key letters and setting letter to object
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
                 if tile == '1':
@@ -142,6 +144,7 @@ class Game:
             self.draw_grid()
             self.all_sprites.draw(self.screen)
             # draw the timer
+            self.draw_text(self.screen, str(self.player.moneybag), 64, PURPLE, 1, 1)
             self.draw_text(self.screen, str(self.cooldown.current_time), 24, BGCOLOR, WIDTH/2 - 32, 2)
             pg.display.flip()
 
@@ -156,6 +159,13 @@ class Game:
     def show_start_screen(self):
         self.screen.fill(BGCOLOR)
         self.draw_text(self.screen, "This is the start screen - press any key to play", 24, WHITE, WIDTH/2, HEIGHT/2)
+        pg.display.flip()
+        self.wait_for_key()
+
+    def show_go_screen(self):
+        self.screen.fill(ORANGE)
+        # text for win
+        self.draw_text(self.screen, "YOU WIN", 100, WHITE, WIDTH/3000, HEIGHT/160)
         pg.display.flip()
         self.wait_for_key()
 
@@ -177,7 +187,7 @@ class Game:
 # Instantiate Game
 g = Game()
 g.show_start_screen()
-while g.running:
+while True:
     g.new()
     g.run()
-    # g.show_go_screen()
+    g.show_go_screen()

@@ -4,6 +4,7 @@ import pygame as pg
 from settings import *
 import math
 import random
+import sys
 
 # write a player class
 class Player(pg.sprite.Sprite):
@@ -79,7 +80,10 @@ class Player(pg.sprite.Sprite):
                 self.rect.x = self.x
                 self.rect.y = self.y
             if str(hits[0].__class__.__name__) == "Mob":
-                self.playing = False          
+                pg.quit()
+
+
+
 
     # new motion
     # check if player collides with groups
@@ -94,8 +98,8 @@ class Player(pg.sprite.Sprite):
         self.collide_with_group(self.game.coins, True)
         self.collide_with_group(self.game.power_ups, True)
         self.collide_with_group(self.game.portals, True)
-        self.collide_with_group(self.game.slow_downs, True)      
-
+        self.collide_with_group(self.game.slow_downs, True)     
+        self.collide_with_group(self.game.mobs, False)
 
 
 
