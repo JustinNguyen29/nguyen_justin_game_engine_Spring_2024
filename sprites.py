@@ -79,8 +79,8 @@ class Player(pg.sprite.Sprite):
                 self.y = random_y
                 self.rect.x = self.x
                 self.rect.y = self.y
-            if str(hits[0].__class__.__name__) == "Mob":
-                pg.quit()
+            # if str(hits[0].__class__.__name__) == "Mob":
+                # pg.quit()
 
 
 
