@@ -15,6 +15,14 @@ from os import path
 # Scrolling backgrounds
 # Scoreboard
 
+'''
+BETA GOAL
+Add more graphics
+
+Gameplay Goal:
+Add Weapons
+'''
+
 class Cooldown():
     # sets all properties to zero when instantiated...
     def __init__(self):
