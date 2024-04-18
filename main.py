@@ -69,6 +69,7 @@ class Game:
         game_folder = path.dirname(__file__)
         img_folder = path.join(game_folder, 'images')
         self.player_img = pg.image.load(path.join(img_folder, 'baby_yoda.png')).convert_alpha()
+        self.wall_img = pg.image.load(path.join(img_folder, 'wall.png')).convert_alpha()
         self.map_data = []
         with open(path.join(game_folder, 'map.txt'), 'rt') as f:
             for line in f:
@@ -86,6 +87,7 @@ class Game:
         self.mobs = pg.sprite.Group()
         self.portals = pg.sprite.Group()
         self.slow_downs = pg.sprite.Group()
+        self.weapons = pg.sprite.Group()
         # go through each line of the text file searching for key letters and setting letter to object
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
@@ -174,6 +176,12 @@ class Game:
         self.screen.fill(ORANGE)
         # text for win
         self.draw_text(self.screen, "YOU WIN", 100, WHITE, WIDTH/3000, HEIGHT/160)
+        pg.display.flip()
+        self.wait_for_key()
+
+    def show_end_screen(self):
+        self.screen.fill(BGCOLOR)
+        self.draw_text(self.screen, "You died", 25, WHITE, WIDTH/2, HEIGHT/2)
         pg.display.flip()
         self.wait_for_key()
 

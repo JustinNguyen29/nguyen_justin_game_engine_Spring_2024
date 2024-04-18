@@ -6,6 +6,8 @@ import math
 import random
 import sys
 
+vec = pg.math.Vector2
+
 # write a player class
 class Player(pg.sprite.Sprite):
     # initializing player
@@ -20,6 +22,8 @@ class Player(pg.sprite.Sprite):
         self.y = y * TILESIZE
         self.speed = 300
         self.moneybag = 0
+        self.weapon_drawn = False
+        self.weapon_dir = (0,0)
 
     # get keys function which gets input from keyboard and corresponds to direction of player
     def get_keys(self):
@@ -80,7 +84,7 @@ class Player(pg.sprite.Sprite):
                 self.rect.x = self.x
                 self.rect.y = self.y
             if str(hits[0].__class__.__name__) == "Mob":
-                self.kill()
+                self.kill()            
                 #pg.quit()
 
 
@@ -111,8 +115,7 @@ class Wall(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.walls
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(YELLOW)
+        self.image = game.wall_img
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -243,4 +246,54 @@ class Portal(pg.sprite.Sprite):
         # Destination coordinates for the corresponding Portal2
         self.destination_x = TILESIZE
         self.destination_y = TILESIZE
+
+
+class Weapon(pg.sprite.Sprite):
+    def __init__(self, game, typ, x, y, w, h, dir):
+        self.groups = game.all_sprites, game.weapons
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((w, h))
+        self.image.fill(WHITE)
+        self.rect = self.image.get_rect()
+        self.vx, self.vy = 0, 0
+        self.x = x
+        self.y = y
+        self.rect.x = x
+        self.rect.y = y
+        self.w = w
+        self.h = h
+        self.rect.width = w
+        self.rect.height = h
+        self.pos = vec(x,y)
+        self.dir = dir
+        self.typ = typ
+        print("I created a sword")
+    def collide_with_group(self, group, kill):
+        hits = pg.sprite.spritecollide(self, group, kill)
+        if hits:
+            if str(hits[0].__class__.__name__) == "Mob":
+                print("you hurt a mob!")
+            if str(hits[0].__class__.__name__) == "Wall":
+                print("you hit a wall")
+                
+    def track(self, obj):
+        self.vx = obj.vx
+        self.vy = obj.vy
+        # self.rect.width = obj.rect.x+self.dir[0]*32+5
+        # self.rect.width = obj.rect.y*self.dir[1]*32+5
+    def update(self):
+        if self.game.player.weapon_drawn == False:
+            self.kill()
+        self.track(self.game.player)
+        self.x += self.vx * self.game.dt
+        self.y += self.vy * self.game.dt
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.collide_with_group(self.game.mobs, False)
+        self.collide_with_group(self.game.walls, True)
+        # hits = pg.sprite.spritecollide(self, self.game.mobs, False)
+        # if hits:
+        #     hits[0].hitpoints -= 1
+
 
