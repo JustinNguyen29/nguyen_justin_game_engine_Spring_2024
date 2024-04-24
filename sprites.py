@@ -67,6 +67,9 @@ class Player(pg.sprite.Sprite):
                 self.moneybag += 1
                 print("You collected a coin!")
                 print("Coin count: " + str(self.moneybag)) # printing coin statements
+                if self.moneybag >= 5:
+                    self.game.stop_game()
+                    self.game.show_go_screen()                   
             if str(hits[0].__class__.__name__) == "PowerUp":
                 self.speed += 200 # increase player speed by 200
             if str(hits[0].__class__.__name__) == "SlowDown":
@@ -84,8 +87,10 @@ class Player(pg.sprite.Sprite):
                 self.rect.x = self.x
                 self.rect.y = self.y
             if str(hits[0].__class__.__name__) == "Mob":
-                self.kill()            
-                #pg.quit()
+                self.kill()              
+                self.game.stop_game()
+                self.game.show_end_screen()
+
 
 
 
