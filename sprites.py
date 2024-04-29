@@ -20,27 +20,49 @@ class Player(pg.sprite.Sprite):
         self.vx, self.vy = 0, 0
         self.x = x * TILESIZE
         self.y = y * TILESIZE
-        self.speed = 300
+        self.speed = PLAYER_SPEED
+        self.last_dir = (0, -1)  # Initialize last_dir with an upward direction
         self.moneybag = 0
         self.weapon_drawn = False
-        self.weapon_dir = (0,0)
+        self.weapon_dir = (0, 0)
 
     # get keys function which gets input from keyboard and corresponds to direction of player
     def get_keys(self):
-        self.vx, self.vy = 0, 0
         keys = pg.key.get_pressed()
-        if keys[pg.K_LEFT] or keys[pg.K_a]:
+        moving = False
+        if keys[pg.K_LEFT]:
             self.vx = -self.speed
-        if keys[pg.K_RIGHT] or keys[pg.K_d]:
+            self.last_dir = (-1, 0)
+            moving = True
+        elif keys[pg.K_RIGHT]:
             self.vx = self.speed
-        if keys[pg.K_UP] or keys[pg.K_w]:
+            self.last_dir = (1, 0)
+            moving = True
+        elif keys[pg.K_UP]:
             self.vy = -self.speed
-        if keys[pg.K_DOWN] or keys[pg.K_s]:
+            self.last_dir = (0, -1)
+            moving = True
+        elif keys[pg.K_DOWN]:
             self.vy = self.speed
+            self.last_dir = (0, 1)
+            moving = True
+        else:
+            self.vx, self.vy = 0, 0  # Stop moving when no arrow keys are pressed
+
+        if keys[pg.K_SPACE] and moving:  # Ensure player is moving to attack
+            if not hasattr(self, 'weapon'):
+                self.weapon = Weapon(self.game, self.rect.centerx, self.rect.centery, 10, 5, self.last_dir)
+
+
+        # Weapon spawning logic
         if keys[pg.K_SPACE]:
             if not hasattr(self, 'weapon'):  # Check if the player already has a weapon
-                self.weapon = Weapon(self.game, self.rect.centerx, self.rect.top, 10, 5)  # Create a new weapon
-            self.weapon_drawn = True
+                # Assuming weapon should spawn at player's location and move in the last movement direction
+                # You may want to adjust where the weapon spawns relative to the player's position
+                self.weapon = Weapon(self.game, self.rect.centerx, self.rect.top, 10, 5, self.last_dir)
+                print("Weapon spawned")  # Debug message to confirm spawning
+
+
 
     # collide with walls group with nested if stateents if player collides with top/bottom left/right of wall
     def collide_with_walls(self, dir):
@@ -255,31 +277,44 @@ class Portal(pg.sprite.Sprite):
 
 
 class Weapon(pg.sprite.Sprite):
-    def __init__(self, game, x, y, w, h):
+    def __init__(self, game, x, y, w, h, dir):
         self.groups = game.all_sprites, game.weapons
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
+        self.dir = dir
         self.image = pg.Surface((w, h))
         self.image.fill(WHITE)  # Color of the sword
         self.rect = self.image.get_rect()
-        self.rect.centerx = x
-        self.rect.centery = y
-        self.following = game.player  # Reference to the player
+        self.update_position(x, y, dir)
+
+    def update_position(self, x, y, dir):
+        offset = 20  # Distance from player center
+        if dir == (0, -1):  # Up
+            self.rect.centerx = x
+            self.rect.top = y - offset
+        elif dir == (0, 1):  # Down
+            self.rect.centerx = x
+            self.rect.bottom = y + offset
+        elif dir == (-1, 0):  # Left
+            self.rect.right = x - offset
+            self.rect.centery = y
+        elif dir == (1, 0):  # Right
+            self.rect.left = x + offset
+            self.rect.centery = y
 
     def update(self):
-        # Update position to follow the player
-        self.rect.centerx = self.following.rect.centerx
-        self.rect.centery = self.following.rect.top  # Position the sword above the player's head
-        print("Weapon updated to position:", self.rect.x, self.rect.y)  # Debug output
+        # Continuously update position with the player
+        self.update_position(self.game.player.rect.centerx, self.game.player.rect.centery, self.game.player.last_dir)
+
+        # Collision detection with mobs
+        hits = pg.sprite.spritecollide(self, self.game.mobs, False, pg.sprite.collide_mask)
+        for hit in hits:
+            print("Hit a mob!")  # Debugging print statement
+            hit.kill()  # Remove the mob from the game
 
 
-    def collide_with_group(self, group, kill):
-        hits = pg.sprite.spritecollide(self, group, kill)
-        if hits:
-            if str(hits[0].__class__.__name__) == "Mob":
-                print("you hurt a mob!")
-            if str(hits[0].__class__.__name__) == "Wall":
-                print("you hit a wall")
+
+
                 
 
 
