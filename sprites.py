@@ -5,6 +5,7 @@ from settings import *
 import math
 import random
 import sys
+from pygame.math import Vector2
 
 vec = pg.math.Vector2
 
@@ -30,6 +31,10 @@ class Player(pg.sprite.Sprite):
     def get_keys(self):
         keys = pg.key.get_pressed()
         moving = False
+        if keys[pg.K_e]:
+            impulse = Impulse(self.game, self)
+            impulse.trigger()
+
         if keys[pg.K_LEFT]:
             self.vx = -self.speed
             self.last_dir = (-1, 0)
@@ -52,6 +57,7 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_SPACE] and moving:  # Ensure player is moving to attack
             if not hasattr(self, 'weapon'):
                 self.weapon = Weapon(self.game, self.rect.centerx, self.rect.centery, 10, 5, self.last_dir)
+
 
 
         # Weapon spawning logic
@@ -311,6 +317,27 @@ class Weapon(pg.sprite.Sprite):
         for hit in hits:
             print("Hit a mob!")  # Debugging print statement
             hit.kill()  # Remove the mob from the game
+
+class Impulse:
+    def __init__(self, game, player, radius=200, force=300):
+        self.game = game
+        self.player = player
+        self.radius = radius
+        self.force = force
+
+    def trigger(self):
+        player_pos = Vector2(self.player.rect.center)
+        for mob in self.game.mobs:
+            mob_pos = Vector2(mob.rect.center)
+            distance = player_pos.distance_to(mob_pos)
+            if distance < self.radius:
+                direction = mob_pos - player_pos
+                if direction.length() > 0:
+                    direction = direction.normalize()
+                # Repel the mob
+                mob.rect.x += direction.x * self.force / max(1, distance)  # Adding max to avoid division by zero
+                mob.rect.y += direction.y * self.force / max(1, distance)
+                print(f"Mob repelled to {mob.rect.center}")
 
 
 
