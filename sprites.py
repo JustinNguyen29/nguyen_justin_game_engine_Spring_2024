@@ -37,6 +37,10 @@ class Player(pg.sprite.Sprite):
             self.vy = -self.speed
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vy = self.speed
+        if keys[pg.K_SPACE]:
+            if not hasattr(self, 'weapon'):  # Check if the player already has a weapon
+                self.weapon = Weapon(self.game, self.rect.centerx, self.rect.top, 10, 5)  # Create a new weapon
+            self.weapon_drawn = True
 
     # collide with walls group with nested if stateents if player collides with top/bottom left/right of wall
     def collide_with_walls(self, dir):
@@ -89,7 +93,8 @@ class Player(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "Mob":
                 self.kill()              
                 self.game.stop_game()
-                self.game.show_end_screen()
+                while True:
+                    self.game.show_end_screen()
 
 
 
@@ -126,10 +131,6 @@ class Wall(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
-    def update(self):
-        # self.rect.x += 1
-        # self.rect.y += 1
-        pass
 
 class Coin(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -254,26 +255,24 @@ class Portal(pg.sprite.Sprite):
 
 
 class Weapon(pg.sprite.Sprite):
-    def __init__(self, game, typ, x, y, w, h, dir):
+    def __init__(self, game, x, y, w, h):
         self.groups = game.all_sprites, game.weapons
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((w, h))
-        self.image.fill(WHITE)
+        self.image.fill(WHITE)  # Color of the sword
         self.rect = self.image.get_rect()
-        self.vx, self.vy = 0, 0
-        self.x = x
-        self.y = y
-        self.rect.x = x
-        self.rect.y = y
-        self.w = w
-        self.h = h
-        self.rect.width = w
-        self.rect.height = h
-        self.pos = vec(x,y)
-        self.dir = dir
-        self.typ = typ
-        print("I created a sword")
+        self.rect.centerx = x
+        self.rect.centery = y
+        self.following = game.player  # Reference to the player
+
+    def update(self):
+        # Update position to follow the player
+        self.rect.centerx = self.following.rect.centerx
+        self.rect.centery = self.following.rect.top  # Position the sword above the player's head
+        print("Weapon updated to position:", self.rect.x, self.rect.y)  # Debug output
+
+
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
         if hits:
@@ -282,23 +281,5 @@ class Weapon(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "Wall":
                 print("you hit a wall")
                 
-    def track(self, obj):
-        self.vx = obj.vx
-        self.vy = obj.vy
-        # self.rect.width = obj.rect.x+self.dir[0]*32+5
-        # self.rect.width = obj.rect.y*self.dir[1]*32+5
-    def update(self):
-        if self.game.player.weapon_drawn == False:
-            self.kill()
-        self.track(self.game.player)
-        self.x += self.vx * self.game.dt
-        self.y += self.vy * self.game.dt
-        self.rect.x = self.x
-        self.rect.y = self.y
-        self.collide_with_group(self.game.mobs, False)
-        self.collide_with_group(self.game.walls, True)
-        # hits = pg.sprite.spritecollide(self, self.game.mobs, False)
-        # if hits:
-        #     hits[0].hitpoints -= 1
 
 
