@@ -215,6 +215,8 @@ class Mob(pg.sprite.Sprite):
         self.x = x * TILESIZE
         self.y = y * TILESIZE
         self.speed = 100  # Set a consistent speed for the Mob
+        self.impulse_velocity = Vector2(0, 0)  # Additional attribute to handle impulse force
+
 
     def collide_with_walls(self, dir):
         if dir == 'x':
@@ -237,32 +239,36 @@ class Mob(pg.sprite.Sprite):
                 self.rect.y = self.y
 
     def update(self):
-        # utilized AI to help find the distance to player and normalizing the vector. I decided to use this method
-        # as it provided a more streamlined approach to the mob following the player
-        # Calculate the difference in x and y between mob and player
         dx = self.game.player.rect.x - self.rect.x
         dy = self.game.player.rect.y - self.rect.y
-
-        # Calculate the distance to the player using Distance Formula
         distance = math.sqrt(dx**2 + dy**2)
 
-        # Normalize the vector and multiply by mob speed to get velocity
         if distance != 0:
-            self.vx = (dx / distance) * self.speed
-            self.vy = (dy / distance) * self.speed
+            normalized_dx = dx / distance
+            normalized_dy = dy / distance
+            self.vx = normalized_dx * self.speed
+            self.vy = normalized_dy * self.speed
         else:
             self.vx = 0
             self.vy = 0
 
-        # Update rect for collision detection
-        self.x += self.vx * self.game.dt
-        self.rect.x = self.x
-        self.collide_with_walls('x')
 
-        # Move vertically and handle vertical collisions
-        self.y += self.vy * self.game.dt
-        self.rect.y = self.y
+        # Apply AI movement
+        self.rect.x += self.vx * self.game.dt
+        self.rect.y += self.vy * self.game.dt
+
+        # Apply impulse force
+        self.rect.x += int(self.impulse_velocity.x)
+        self.rect.y += int(self.impulse_velocity.y)
+
+        # Reset impulse_velocity after applying it
+        self.impulse_velocity = Vector2(0, 0)
+
+        # Handle collisions with walls
+        self.collide_with_walls('x')
         self.collide_with_walls('y')
+
+
 
 # Initializing portal Class
 class Portal(pg.sprite.Sprite):
@@ -319,7 +325,8 @@ class Weapon(pg.sprite.Sprite):
             hit.kill()  # Remove the mob from the game
 
 class Impulse:
-    def __init__(self, game, player, radius=200, force=300):
+    # utilized AI to help with implementation
+    def __init__(self, game, player, radius=100, force=500):
         self.game = game
         self.player = player
         self.radius = radius
@@ -330,14 +337,12 @@ class Impulse:
         for mob in self.game.mobs:
             mob_pos = Vector2(mob.rect.center)
             distance = player_pos.distance_to(mob_pos)
-            if distance < self.radius:
+            if distance < self.radius and distance > 0:  # Avoid division by zero
                 direction = mob_pos - player_pos
-                if direction.length() > 0:
-                    direction = direction.normalize()
-                # Repel the mob
-                mob.rect.x += direction.x * self.force / max(1, distance)  # Adding max to avoid division by zero
-                mob.rect.y += direction.y * self.force / max(1, distance)
-                print(f"Mob repelled to {mob.rect.center}")
+                direction.normalize_ip()
+                # Apply force inversely proportional to distance
+                mob.impulse_velocity += direction * (self.force / max(1, distance))
+                print(f"Mob repelled to {mob.rect.center} with impulse velocity {mob.impulse_velocity}")
 
 
 
