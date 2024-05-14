@@ -64,6 +64,7 @@ class Game:
         # later on we'll story game info with this
         self.load_data()
         self.game_over = False
+        self.bosses = pg.sprite.Group()
 
     def load_data(self):
         game_folder = path.dirname(__file__)
@@ -74,7 +75,7 @@ class Game:
         with open(path.join(game_folder, 'map.txt'), 'rt') as f:
             for line in f:
                 print(line)
-                self.map_data.append(line)        
+                self.map_data.append(line)    
 
     def new(self):
         # create timer
@@ -117,6 +118,7 @@ class Game:
             self.update()
             # this is output
             self.draw()
+
 
     def quit(self):
         pg.quit()

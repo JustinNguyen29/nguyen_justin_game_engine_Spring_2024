@@ -34,7 +34,6 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_e]:
             impulse = Impulse(self.game, self)
             impulse.trigger()
-
         if keys[pg.K_LEFT]:
             self.vx = -self.speed
             self.last_dir = (-1, 0)
@@ -252,8 +251,6 @@ class Mob(pg.sprite.Sprite):
             self.vx = 0
             self.vy = 0
 
-
-        # Apply AI movement
         self.rect.x += self.vx * self.game.dt
         self.rect.y += self.vy * self.game.dt
 
@@ -267,6 +264,11 @@ class Mob(pg.sprite.Sprite):
         # Handle collisions with walls
         self.collide_with_walls('x')
         self.collide_with_walls('y')
+
+    def create_particles(self):
+        for _ in range(20):  # Create 20 particles
+            particle = Particle(self.rect.centerx, self.rect.centery)
+            self.game.all_sprites.add(particle)
 
 
 
@@ -322,6 +324,7 @@ class Weapon(pg.sprite.Sprite):
         hits = pg.sprite.spritecollide(self, self.game.mobs, False, pg.sprite.collide_mask)
         for hit in hits:
             print("Hit a mob!")  # Debugging print statement
+            hit.create_particles()
             hit.kill()  # Remove the mob from the game
 
 class Impulse:
@@ -345,8 +348,21 @@ class Impulse:
                 print(f"Mob repelled to {mob.rect.center} with impulse velocity {mob.impulse_velocity}")
 
 
+class Particle(pg.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pg.Surface((5, 5))  # Size of the particle
+        self.image.fill((255, 255, 255))  # White particles
+        self.rect = self.image.get_rect(center=(x, y))
+        self.velocity = pg.math.Vector2(random.uniform(-1, 1), random.uniform(-1, 1)) * random.randint(2, 5)
+        self.lifetime = random.randint(20, 50)  # Frames before dying
 
-
+    def update(self):
+        self.rect.x += self.velocity.x
+        self.rect.y += self.velocity.y
+        self.lifetime -= 1
+        if self.lifetime <= 0:
+            self.kill()
                 
 
 
