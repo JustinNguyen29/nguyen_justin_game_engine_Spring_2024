@@ -286,7 +286,7 @@ class Portal(pg.sprite.Sprite):
         self.destination_x = TILESIZE
         self.destination_y = TILESIZE
 
-
+# modified from ChatGPT
 class Weapon(pg.sprite.Sprite):
     def __init__(self, game, x, y, w, h, dir):
         self.groups = game.all_sprites, game.weapons
@@ -349,6 +349,7 @@ class Impulse:
                 print(f"Mob repelled to {mob.rect.center} with impulse velocity {mob.impulse_velocity}")
 
 
+# modified from ChatGPT
 class Particle(pg.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -446,5 +447,6 @@ class FinalBoss(pg.sprite.Sprite):
 
     def get_hit(self):
         self.health -= 1
+        print(f"Boss health: {self.health}")  # Debugging print statement to check health
         if self.health <= 0:
             self.kill()
