@@ -98,9 +98,9 @@ class Player(pg.sprite.Sprite):
                 self.moneybag += 1
                 print("You collected a coin!")
                 print("Coin count: " + str(self.moneybag)) # printing coin statements
-                if self.moneybag >= 5:
-                    self.game.stop_game()
-                    self.game.show_go_screen()                   
+                # if self.moneybag >= 5:
+                    # self.game.stop_game()
+                    # self.game.show_go_screen()                   
             if str(hits[0].__class__.__name__) == "PowerUp":
                 self.speed += 200 # increase player speed by 200
             if str(hits[0].__class__.__name__) == "SlowDown":
@@ -123,10 +123,6 @@ class Player(pg.sprite.Sprite):
                 while True:
                     self.game.show_end_screen()
 
-
-
-
-
     # new motion
     # check if player collides with groups
     def update(self):
@@ -142,6 +138,7 @@ class Player(pg.sprite.Sprite):
         self.collide_with_group(self.game.portals, True)
         self.collide_with_group(self.game.slow_downs, True)     
         self.collide_with_group(self.game.mobs, False)
+        self.collide_with_group(self.game.bosses, True)
 
 
 
@@ -326,6 +323,10 @@ class Weapon(pg.sprite.Sprite):
             print("Hit a mob!")  # Debugging print statement
             hit.create_particles()
             hit.kill()  # Remove the mob from the game
+        boss_hits = pg.sprite.spritecollide(self, self.game.bosses, False, pg.sprite.collide_mask)
+        for boss in boss_hits:
+            boss.get_hit()
+            print("Hit the boss!")  # Debugging print statement
 
 class Impulse:
     # utilized AI to help with implementation
@@ -363,6 +364,87 @@ class Particle(pg.sprite.Sprite):
         self.lifetime -= 1
         if self.lifetime <= 0:
             self.kill()
-                
 
 
+class FinalBoss(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.bosses
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE * 2, TILESIZE * 2))  # Boss is larger than other sprites
+        self.image.fill(RED)  # Change color as desired
+        self.rect = self.image.get_rect()
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.health = 2  # Boss needs to be hit twice
+        self.max_health = 2  # Max health for the health bar
+        self.speed = 100  # Set a consistent speed for the Mob
+        self.impulse_velocity = Vector2(0, 0) 
+
+    def collide_with_walls(self, dir):
+        if dir == 'x':
+            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            if hits:
+                if self.vx > 0:  # Moving right- hit the left side of the wall
+                    self.x = hits[0].rect.left - self.rect.width
+                elif self.vx < 0:  # Moving left- hit the right side of the wall
+                    self.x = hits[0].rect.right
+                self.vx = 0
+                self.rect.x = self.x
+        if dir == 'y':
+            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            if hits:
+                if self.vy > 0:  # Moving down- hit the top side of the wall
+                    self.y = hits[0].rect.top - self.rect.height
+                elif self.vy < 0:  # Moving up- hit the bottom side of the wall
+                    self.y = hits[0].rect.bottom
+                self.vy = 0
+                self.rect.y = self.y
+
+    def update(self):
+        dx = self.game.player.rect.x - self.rect.x
+        dy = self.game.player.rect.y - self.rect.y
+        distance = math.sqrt(dx**2 + dy**2)
+
+        if distance != 0:
+            normalized_dx = dx / distance
+            normalized_dy = dy / distance
+            self.vx = normalized_dx * self.speed
+            self.vy = normalized_dy * self.speed
+        else:
+            self.vx = 0
+            self.vy = 0
+
+        self.rect.x += self.vx * self.game.dt
+        self.rect.y += self.vy * self.game.dt
+
+        # Apply impulse force
+        self.rect.x += int(self.impulse_velocity.x)
+        self.rect.y += int(self.impulse_velocity.y)
+
+        # Reset impulse_velocity after applying it
+        self.impulse_velocity = Vector2(0, 0)
+
+        # Handle collisions with walls
+        self.collide_with_walls('x')
+        self.collide_with_walls('y')
+
+    def create_particles(self):
+        for _ in range(20):  # Create 20 particles
+            particle = Particle(self.rect.centerx, self.rect.centery)
+            self.game.all_sprites.add(particle)
+
+    def draw_health_bar(self, surface):
+        # Calculate the width of the health bar
+        health_bar_width = self.rect.width * (self.health / self.max_health)
+        health_bar = pg.Rect(self.rect.x, self.rect.y - 10, health_bar_width, 5)
+        outline_rect = pg.Rect(self.rect.x, self.rect.y - 10, self.rect.width, 5)
+        pg.draw.rect(surface, RED, health_bar)
+        pg.draw.rect(surface, WHITE, outline_rect, 2)  # Draw border around health bar
+
+    def get_hit(self):
+        self.health -= 1
+        if self.health <= 0:
+            self.kill()

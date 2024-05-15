@@ -9,20 +9,6 @@ import sys
 from random import randint
 from os import path
 
-# New things to include
-# Teleport
-# Enemies following player
-# Scrolling backgrounds
-# Scoreboard
-
-'''
-BETA GOAL
-Add more graphics
-
-Gameplay Goal:
-Add Weapons
-'''
-
 class Cooldown():
     # sets all properties to zero when instantiated...
     def __init__(self):
@@ -89,6 +75,7 @@ class Game:
         self.portals = pg.sprite.Group()
         self.slow_downs = pg.sprite.Group()
         self.weapons = pg.sprite.Group()
+        self.bosses = pg.sprite.Group()
         # go through each line of the text file searching for key letters and setting letter to object
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
@@ -133,6 +120,15 @@ class Game:
         # tick the test timer
         self.cooldown.ticking()
         self.all_sprites.update()
+        # Check if all coins are collected and all mobs are killed
+        if len(self.coins) == 0 and len(self.mobs) == 0 and not self.bosses:
+            print("All coins collected and all mobs killed. Spawning the final boss.")
+            self.spawn_final_boss()
+
+    def spawn_final_boss(self):
+        boss_x, boss_y = 10, 10  # Set coordinates where the boss should spawn
+        FinalBoss(self, boss_x, boss_y)
+        print("Final boss spawned at (10, 10)")
 
     # draw_grid function to draw the grid with height HEIGHT
     def draw_grid(self):
@@ -155,6 +151,8 @@ class Game:
             self.screen.fill(BGCOLOR)
             self.draw_grid()
             self.all_sprites.draw(self.screen)
+            for boss in self.bosses:
+                boss.draw_health_bar(self.screen)
             # draw the timer
             self.draw_text(self.screen, str(self.player.moneybag), 64, PURPLE, 1, 1)
             self.draw_text(self.screen, str(self.cooldown.current_time), 24, BGCOLOR, WIDTH/2 - 32, 2)
@@ -206,8 +204,6 @@ class Game:
 # Instantiate Game
 g = Game()
 g.show_start_screen()
-
-
 g.new()
 g.run()
 #g.show_go_screen()
