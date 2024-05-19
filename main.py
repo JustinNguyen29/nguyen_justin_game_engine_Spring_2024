@@ -47,6 +47,7 @@ class Game:
         self.clock = pg.time.Clock()
         pg.key.set_repeat(500,100)
         self.running = True
+        self.boss_spawned = False
         # later on we'll story game info with this
         self.load_data()
         self.game_over = False
@@ -117,17 +118,17 @@ class Game:
 
     # update function to update all sprites
     def update(self):
-        # tick the test timer
         self.cooldown.ticking()
         self.all_sprites.update()
         # Check if all coins are collected and all mobs are killed
-        if len(self.coins) == 0 and len(self.mobs) == 0 and not self.bosses:
+        if len(self.coins) == 0 and len(self.mobs) == 0 and not self.bosses and not self.boss_spawned:
             print("All coins collected and all mobs killed. Spawning the final boss.")
             self.spawn_final_boss()
 
     def spawn_final_boss(self):
         boss_x, boss_y = 10, 10  # Set coordinates where the boss should spawn
         FinalBoss(self, boss_x, boss_y)
+        self.boss_spawned = True  # Set the flag to indicate the boss has been spawned
         print("Final boss spawned at (10, 10)")
 
     # draw_grid function to draw the grid with height HEIGHT

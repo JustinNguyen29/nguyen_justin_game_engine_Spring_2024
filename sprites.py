@@ -293,7 +293,10 @@ class Weapon(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.dir = dir
-        self.image = pg.Surface((w, h))
+        self.base_width = w
+        self.base_height = h
+        self.hitbox_extension = 5  # Reduce the hitbox size
+        self.image = pg.Surface((self.base_width + self.hitbox_extension, self.base_height + self.hitbox_extension))
         self.image.fill(WHITE)  # Color of the sword
         self.rect = self.image.get_rect()
         self.update_position(x, y, dir)
@@ -323,13 +326,16 @@ class Weapon(pg.sprite.Sprite):
             print("Hit a mob!")  # Debugging print statement
             hit.create_particles()
             hit.kill()  # Remove the mob from the game
+        
+        # Collision detection with final boss
         boss_hits = pg.sprite.spritecollide(self, self.game.bosses, False, pg.sprite.collide_mask)
         for boss in boss_hits:
             boss.get_hit()
             print("Hit the boss!")  # Debugging print statement
 
+
 class Impulse:
-    # utilized AI to help with implementation
+    # utilized OpenAI to help with implementation
     def __init__(self, game, player, radius=100, force=500):
         self.game = game
         self.player = player
@@ -354,7 +360,7 @@ class Particle(pg.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.image = pg.Surface((5, 5))  # Size of the particle
-        self.image.fill((255, 255, 255))  # White particles
+        self.image.fill(RED)  # Red particles
         self.rect = self.image.get_rect(center=(x, y))
         self.velocity = pg.math.Vector2(random.uniform(-1, 1), random.uniform(-1, 1)) * random.randint(2, 5)
         self.lifetime = random.randint(20, 50)  # Frames before dying
@@ -375,14 +381,13 @@ class FinalBoss(pg.sprite.Sprite):
         self.image = pg.Surface((TILESIZE * 2, TILESIZE * 2))  # Boss is larger than other sprites
         self.image.fill(RED)  # Change color as desired
         self.rect = self.image.get_rect()
-        self.x = x * TILESIZE
-        self.y = y * TILESIZE
-        self.rect.x = self.x
-        self.rect.y = self.y
-        self.health = 2  # Boss needs to be hit twice
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+        self.health = 2  # Boss needs to be hit once
         self.max_health = 2  # Max health for the health bar
-        self.speed = 100  # Set a consistent speed for the Mob
-        self.impulse_velocity = Vector2(0, 0) 
+        self.speed = 200  # Set a consistent speed for the Mob
+        self.impulse_velocity = Vector2(0, 0)
+
 
     def collide_with_walls(self, dir):
         if dir == 'x':
@@ -437,6 +442,7 @@ class FinalBoss(pg.sprite.Sprite):
             particle = Particle(self.rect.centerx, self.rect.centery)
             self.game.all_sprites.add(particle)
 
+
     def draw_health_bar(self, surface):
         # Calculate the width of the health bar
         health_bar_width = self.rect.width * (self.health / self.max_health)
@@ -450,3 +456,5 @@ class FinalBoss(pg.sprite.Sprite):
         print(f"Boss health: {self.health}")  # Debugging print statement to check health
         if self.health <= 0:
             self.kill()
+
+
